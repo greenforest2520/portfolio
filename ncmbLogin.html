@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCMBログイン</title>
+</head>
+<body>
+    <div id="register">
+        <p>アカウントを作成します。項目を入力してください。</p>
+        <label for="addName">名前</label>
+        <input type="text" name="" id="addName">
+        <label for="addPassword">パスワード</label>
+        <input type="text" name="" id="addPassword">
+        <button id="registerBtn">ユーザー登録</button>
+        <p><span id="errormsg0"></span></p>
+    </div>
+    <div id="login">
+        <p>登録完了しました。</p>
+        <br>
+        <p>パスワードを入力してください。</p>
+
+        
+        <p><span id="errormsg1"></span></p>
+
+        <input type="password" name="" id="loginpass">
+        <button id="loginBtn">ユーザーログイン</button>
+    </div>
+    <div id="docoTsubu">
+        <ul>本日の占い</ul>
+        
+        <span id="DateTimeDisp"></span>
+        
+         <li><span id="loginUser"></span>さん、ログイン中</li>
+         <li><button id="logout">ログアウト</button></li>
+         <p><span id="today"></span>運勢は「<span id="luck"></span>」です。</p>
+    
+    
+    </div>
+    
+    <script>
+        function update(_v)
+        {
+            document.querySelector('input').value=_v
+        }
+        function append(_v)
+        {
+            document.querySelector('input').value+=_v
+        }
+        function calc() // 「＝」ボタンが押されたので計算する
+        {
+            const v = document.querySelector( 'input' ).value
+            try {
+                const f = new Function( 'return ' + v )
+                update( f().toString() )
+            } catch( _error ) {
+                update( _error ) // 計算に失敗した場合は、そのエラーの内容を表示する
+            }
+        }
+    </script>
+ 
+
+   
+ 
+  
+   
+
+
+    <script src="./js/ncmb.min.js"></script>
+   
+
+    
+    <script>
+        window.addEventListener("DOMContentLoaded",function(){
+            console.log("start")
+
+            var ncmb = new NCMB("9f08ce650ea0d70d13545c6078e5087e9734adeb41814323d8948202561f74f0",
+            "90cb28b58b84f0f8015c9f8f9206538df6dd3e8619b7f72d540d8d1f78884a6c")
+            console.log(ncmb)
+            
+            const loginList = ncmb.DataStore("Lists")
+            const registerDiv = document.querySelector("#register")
+  //結果画面
+            const loginDiv = document.querySelector("#login")
+            const docoTsubuDiv = document.querySelector("#docoTsubu")
+
+            const lists = document.querySelector("#lists")//tableの指定
+            //初期表示
+            
+            
+           
+            
+
+  //resultを隠す
+            loginDiv.style.display ="none"
+            docoTsubuDiv.style.display ="none"
+            document.querySelector("#registerBtn").addEventListener("click",function(){
+                const User={
+                    addName:"",
+                    addPassword:0,
+                    
+                }
+                const addName = document.querySelector("#addName")
+                const addTsubu = document.querySelector("#addPassword")
+                document.querySelector("#loginUser").innerHTML =addName.value
+                //ユーザー登録
+                const user = new ncmb.User();
+                user.set("userName", addName.value) /* ユーザー名 */
+                    .set("password", addPassword.value) /* パスワード */
+               
+                // ユーザーの新規登録処理
+                user.signUpByAccount()
+                 .then(function(){
+                    // 登録後処理
+                        console.log("登録完了")
+                        loginDiv.style.display ="block"
+                        registerDiv.style.display ="none"
+                    })
+                    .catch(function(err){
+                    // エラー処理
+                        console.log(err)
+                        document.getElementById('errormsg0').textContent = '既に登録済みアカウントです。新しく作ってください。'
+
+                    });
+                
+            
+            })
+
+            document.querySelector("#loginBtn").addEventListener("click",function(){
+                const loginpass = document.querySelector("#loginpass").value
+                const user = new ncmb.User({userName:addName.value, password:loginpass});
+                ncmb.User.login(user)
+                    .then(function(data){
+                        // ログイン後処理
+                        console.log("Login成功")
+                        console.log(data)
+                        docoTsubuDiv.style.display ="block"
+                        loginDiv.style.display ="none"
+                    })
+                    .catch(function(err){
+                        // エラー処理
+                        console.log("Login失敗")
+                        document.getElementById('errormsg1').textContent = 'パスワードが違います。'
+
+                    });
+
+            
+            })
+
+            const backBtn = document.querySelector("#logout")
+            backBtn.addEventListener("click",function(){
+                console.log("load")
+                
+
+                loginDiv.style.display ="block"
+                registerDiv.style.display ="none"
+                docoTsubuDiv.style.display ="none"
+        
+
+
+             })
+            
+           
+             const luckArray=["超スッキリ","スッキリ","最悪"];
+             const index = Math.floor(Math.random()*3)
+                const luck = luckArray[index]
+                //console.log(luck)
+
+                const luckTag = document.querySelector("#luck")
+                luckTag.innerText = luck
+            
+
+                //実行日を所得 jsのmonthは一つ少ない
+                const date = new Date()
+                //const today = (date.getMonth()+1)+"月"+date.getDate()+"日"
+
+                const today =`${date.getMonth()+1}年${date.getDate()}日`
+                //console.log(today)
+                // console.log(date.getFullYear())
+                // console.log(date.getMonth())
+                // console.log(date.getDate())
+
+                //コンテンツの埋め込み
+                const todayTag = document.querySelector("#today")
+                todayTag.innerText = today
+                //一行化
+                //document.querySelector("#luck").innerText = luck
+
+                
+                
+    
+                
+                
+              
+            
+            })
+    </script>
+    
+</body>
+</html>
